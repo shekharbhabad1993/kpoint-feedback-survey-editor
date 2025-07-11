@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Preview</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="preview-container">
+        <header class="preview-header">
+            <div class="header-content">
+                <h1><i class="fas fa-eye"></i> Survey Preview</h1>
+                <div class="header-actions">
+                    <a href="/editor" class="btn btn-secondary"><i class="fas fa-edit"></i> Back to Editor</a>
+                    <button onclick="downloadSurveyCode()" class="btn btn-success"><i class="fas fa-download"></i> Download HTML</button>
+                    <button onclick="copyToClipboard()" class="btn btn-primary"><i class="fas fa-copy"></i> Copy Code</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="preview-content">
+            <div class="preview-section">
+                <h2>Live Preview</h2>
+                <div class="preview-frame-container">
+                    <div id="preview-frame" class="preview-frame">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Loading survey preview...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-section">
+                <h2>Generated Code</h2>
+                <div class="code-container">
+                    <div class="code-header">
+                        <span>HTML/CSS/JavaScript</span>
+                        <button onclick="copyToClipboard()" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <pre id="generated-code" class="code-block">
+                        <code><!-- Generated code will appear here --></code>
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSurvey = null;
+        let generatedCode = '';
+
+        async function loadSurvey() {
+            const urlPath = window.location.pathname;
+            const surveyId = urlPath.split('/').pop();
+            
+            if (surveyId === 'preview') {
+                // No survey ID provided
+                document.getElementById('preview-frame').innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>No survey ID provided. <a href="/editor">Create a survey</a> first.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                // Load survey data
+                const surveyResponse = await fetch(`/api/surveys/${surveyId}`);
+                const surveyData = await surveyResponse.json();
+                
+                if (!surveyData.success) {
+                    throw new Error('Survey not found');
+                }
+                
+                currentSurvey = surveyData.survey;
+                
+                // Generate and display code
+                const codeResponse = await fetch(`/api/surveys/${surveyId}/generate`);
+                const codeData = await codeResponse.json();
+                
+                if (codeData.success) {
+                    generatedCode = codeData.code;
+                    document.getElementById('generated-code').textContent = generatedCode;
+                    
+                    // Create preview iframe
+                    createPreviewFrame();
+                } else {
+                    throw new Error('Failed to generate code');
+                }
+                
+            } catch (error) {
+                console.error('Error loading survey:', error);
+                document.getElementById('preview-frame').innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading survey: ${error.message}</p>
+                        <a href="/editor" class="btn btn-primary">Create New Survey</a>
+                    </div>
+                `;
+            }
+        }
+
+        function createPreviewFrame() {
+            const previewFrame = document.getElementById('preview-frame');
+            
+            // Create a simplified preview that shows the survey structure
+            const questions = currentSurvey.questions || [];
+            
+            let previewHTML = `
+                <div class="survey-preview">
+                    <div class="survey-info">
+                        <h3>${currentSurvey.title || 'Untitled Survey'}</h3>
+                        <p><strong>${questions.length}</strong> questions • <strong>${currentSurvey.starRating?.maxStars || 5}</strong> star rating</p>
+                    </div>
+                    
+                    <div class="questions-preview">
+                        ${questions.map((question, index) => `
+                            <div class="question-preview">
+                                <div class="question-header">
+                                    <span class="question-number">Question ${index + 1}/${questions.length}</span>
+                                    <span class="question-type">${question.type === 'star-rating' ? 'Star Rating' : 'Text Input'}</span>
+                                </div>
+                                <div class="question-text">${question.text}</div>
+                                ${question.type === 'star-rating' ? 
+                                    `<div class="stars-preview">
+                                        ${Array.from({length: currentSurvey.starRating?.maxStars || 5}, (_, i) => 
+                                            `<i class="far fa-star"></i>`
+                                        ).join('')}
+                                    </div>` : 
+                                    `<div class="text-preview">
+                                        <textarea placeholder="${question.placeholder || 'Type your comments here'}" disabled></textarea>
+                                    </div>`
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="thank-you-preview">
+                        <h4>Thank You Message</h4>
+                        <p><strong>${currentSurvey.thankYouMessage || 'Thank you for your response!'}</strong></p>
+                        <p>${currentSurvey.thankYouSubtext || 'Your feedback helps us improve our content and services.'}</p>
+                    </div>
+                </div>
+            `;
+            
+            previewFrame.innerHTML = previewHTML;
+        }
+
+        async function downloadSurveyCode() {
+            if (!generatedCode) {
+                alert('No code to download. Please wait for the survey to load.');
+                return;
+            }
+            
+            const blob = new Blob([generatedCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `survey-${currentSurvey?.id || 'generated'}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function copyToClipboard() {
+            if (!generatedCode) {
+                alert('No code to copy. Please wait for the survey to load.');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(generatedCode);
+                
+                // Show feedback
+                const btn = event.target.closest('button');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Failed to copy to clipboard:', error);
+                alert('Failed to copy to clipboard. Please select and copy the code manually.');
+            }
+        }
+
+        // Load survey when page loads
+        document.addEventListener('DOMContentLoaded', loadSurvey);
+    </script>
+</body>
+</html>

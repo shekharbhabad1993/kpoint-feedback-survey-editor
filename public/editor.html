@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Editor - Step by Step</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="wizard-container">
+        <header class="wizard-header">
+            <div class="header-content">
+                <div>
+                    <h1><i class="fas fa-magic"></i> Survey Wizard</h1>
+                    <p>Create your interactive feedback survey step by step</p>
+                </div>
+                <div class="header-actions">
+                    <a href="/" class="btn btn-secondary"><i class="fas fa-home"></i> Home</a>
+                    <button onclick="saveSurvey()" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
+                    <button onclick="previewSurvey()" class="btn btn-primary"><i class="fas fa-eye"></i> Preview</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-steps">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Basic Info</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Questions</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Video Setup</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Styling</div>
+                    </div>
+                    <div class="step" data-step="5">
+                        <div class="step-number">5</div>
+                        <div class="step-label">Finish</div>
+                    </div>
+                </div>
+                <div class="progress-line">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="wizard-content">
+            <!-- Step 1: Basic Information -->
+            <div class="wizard-step active" data-step="1">
+                <div class="step-container">
+                    <div class="step-header">
+                        <h2><i class="fas fa-info-circle"></i> Basic Information</h2>
+                        <p>Let's start with the basics of your feedback survey</p>
+                    </div>
+                    
+                    <div class="step-content">
+                        <div class="form-card">
+                            <div class="form-group">
+                                <label for="survey-title">Survey Title</label>
+                                <input type="text" id="survey-title" placeholder="e.g., Customer Feedback Survey" value="Interactive Feedback Survey">
+                                <small>This title will appear in your survey management</small>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="max-stars">Star Rating Scale</label>
+                                    <select id="max-stars">
+                                        <option value="3">3 Stars ⭐⭐⭐</option>
+                                        <option value="4">4 Stars ⭐⭐⭐⭐</option>
+                                        <option value="5" selected>5 Stars ⭐⭐⭐⭐⭐</option>
+                                        <option value="6">6 Stars</option>
+                                        <option value="7">7 Stars</option>
+                                        <option value="8">8 Stars</option>
+                                        <option value="9">9 Stars</option>
+                                        <option value="10">10 Stars</option>
+                                    </select>
+                                    <small>Maximum number of stars for rating questions</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="question-count">Number of Questions</label>
+                                    <div class="number-selector">
+                                        <button type="button" onclick="changeQuestionCount(-1)">-</button>
+                                        <input type="number" id="question-count" min="1" max="10" value="3" readonly>
+                                        <button type="button" onclick="changeQuestionCount(1)">+</button>
+                                    </div>
+                                    <small>How many questions do you want to ask?</small>
+                                </div>
+                            </div>
+
+                            <div class="preview-section">
+                                <h3>Quick Preview</h3>
+                                <div class="mini-preview">
+                                    <div class="mini-survey-card">
+                                        <span class="mini-title" id="title-preview">Interactive Feedback Survey</span>
+                                        <div class="mini-stars">
+                                            <span id="stars-preview">⭐⭐⭐⭐⭐</span>
+                                        </div>
+                                        <span class="mini-questions" id="questions-preview">3 Questions</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Questions Configuration -->
+            <div class="wizard-step" data-step="2">
+                <div class="step-container">
+                    <div class="step-header">
+                        <h2><i class="fas fa-question-circle"></i> Design Your Questions</h2>
+                        <p>Create engaging questions for your audience</p>
+                    </div>
+                    
+                    <div class="step-content">
+                        <div class="questions-builder">
+                            <div class="questions-header">
+                                <h3>Configure Your Questions</h3>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="generateQuestions()">
+                                    <i class="fas fa-sync"></i> Refresh Questions
+                                </button>
+                            </div>
+                            
+                            <div id="questions-container">
+                                <!-- Questions will be dynamically added here -->
+                                <div class="loading-questions">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Loading questions...</p>
+                                </div>
+                            </div>
+                            
+                            <div class="question-types-info">
+                                <h3>Question Types</h3>
+                                <div class="type-cards">
+                                    <div class="type-card">
+                                        <i class="fas fa-star"></i>
+                                        <h4>Star Rating</h4>
+                                        <p>Perfect for satisfaction, quality, or experience ratings</p>
+                                    </div>
+                                    <div class="type-card">
+                                        <i class="fas fa-edit"></i>
+                                        <h4>Text Input</h4>
+                                        <p>Great for detailed feedback, suggestions, or comments</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Video Configuration -->
+            <div class="wizard-step" data-step="3">
+                <div class="step-container">
+                    <div class="step-header">
+                        <h2><i class="fas fa-video"></i> Video Integration</h2>
+                        <p>Configure when and how your survey appears in the video</p>
+                    </div>
+                    
+                    <div class="step-content">
+                        <div class="form-card">
+                            <div class="form-section">
+                                <h3><i class="fas fa-server"></i> Video Details</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="video-host">Video Host</label>
+                                        <input type="text" id="video-host" placeholder="e.g., ktpl.kpoint.com" value="ktpl.kpoint.com">
+                                        <small>Your video hosting domain</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="video-id">Video ID</label>
+                                        <input type="text" id="video-id" placeholder="e.g., gcc-b0d436a7-91d7-4719-bef3-44dce93581dc" value="gcc-b0d436a7-91d7-4719-bef3-44dce93581dc">
+                                        <small>Unique identifier for your video</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-section">
+                                <h3><i class="fas fa-clock"></i> Timing Configuration</h3>
+                                <div class="timing-controls">
+                                    <div class="form-group">
+                                        <label for="start-time">Survey Start Time</label>
+                                        <div class="time-input">
+                                            <input type="number" id="start-time" min="0" value="6">
+                                            <span>seconds</span>
+                                        </div>
+                                        <small>When the survey should appear in the video</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="end-time">Survey End Time</label>
+                                        <div class="time-input">
+                                            <input type="number" id="end-time" min="0" value="7">
+                                            <span>seconds</span>
+                                        </div>
+                                        <small>When the survey trigger window ends</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="continue-time">Continue After (ms)</label>
+                                        <div class="time-input">
+                                            <input type="number" id="continue-time" min="0" value="8000">
+                                            <span>milliseconds</span>
+                                        </div>
+                                        <small>Video time to jump to after survey completion</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="timeline-preview">
+                                <h3>Timeline Preview</h3>
+                                <div class="timeline">
+                                    <div class="timeline-bar">
+                                        <div class="timeline-segment video-segment">Video Playing</div>
+                                        <div class="timeline-segment survey-segment" id="survey-timeline">Survey</div>
+                                        <div class="timeline-segment video-segment">Video Continues</div>
+                                    </div>
+                                    <div class="timeline-labels">
+                                        <span>0s</span>
+                                        <span id="start-time-label">6s</span>
+                                        <span id="end-time-label">7s</span>
+                                        <span id="continue-time-label">8s</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Styling -->
+            <div class="wizard-step" data-step="4">
+                <div class="step-container">
+                    <div class="step-header">
+                        <h2><i class="fas fa-palette"></i> Brand Your Survey</h2>
+                        <p>Customize the look and feel to match your brand</p>
+                    </div>
+                    
+                    <div class="step-content">
+                        <div class="styling-section">
+                            <div class="form-card">
+                                <h3><i class="fas fa-paint-brush"></i> Colors</h3>
+                                <div class="color-grid">
+                                    <div class="color-group">
+                                        <label for="primary-color">Primary Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="primary-color" value="#002D72">
+                                            <span class="color-name" id="primary-color-name">#002D72</span>
+                                        </div>
+                                        <small>Used for buttons and highlights</small>
+                                    </div>
+                                    <div class="color-group">
+                                        <label for="text-color">Text Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="text-color" value="#3F3B3C">
+                                            <span class="color-name" id="text-color-name">#3F3B3C</span>
+                                        </div>
+                                        <small>Main text color</small>
+                                    </div>
+                                    <div class="color-group">
+                                        <label for="border-color">Border Color</label>
+                                        <div class="color-picker-wrapper">
+                                            <input type="color" id="border-color" value="#FFFFFF">
+                                            <span class="color-name" id="border-color-name">#FFFFFF</span>
+                                        </div>
+                                        <small>Card border color</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-card">
+                                <h3><i class="fas fa-font"></i> Typography & Layout</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="font-family">Font Family</label>
+                                        <select id="font-family">
+                                            <option value="Poppins" selected>Poppins (Recommended)</option>
+                                            <option value="Arial">Arial</option>
+                                            <option value="Roboto">Roboto</option>
+                                            <option value="Open Sans">Open Sans</option>
+                                            <option value="Lato">Lato</option>
+                                            <option value="Nunito">Nunito</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="card-background">Card Background</label>
+                                        <select id="card-background" onchange="updateCardBackground()">
+                                            <option value="rgba(255, 255, 255, 0.7)">Semi-transparent White</option>
+                                            <option value="rgba(255, 255, 255, 0.9)">Mostly White</option>
+                                            <option value="#FFFFFF">Solid White</option>
+                                            <option value="rgba(0, 0, 0, 0.1)">Light Dark</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                        <input type="text" id="custom-background" style="display: none;" placeholder="e.g., rgba(255, 255, 255, 0.8)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="style-preview">
+                                <h3>Style Preview</h3>
+                                <div class="preview-card" id="style-preview-card">
+                                    <div class="preview-header">Sample Survey Question</div>
+                                    <div class="preview-stars">⭐⭐⭐⭐⭐</div>
+                                    <div class="preview-button" id="preview-button">NEXT</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Finish -->
+            <div class="wizard-step" data-step="5">
+                <div class="step-container">
+                    <div class="step-header">
+                        <h2><i class="fas fa-heart"></i> Final Touches</h2>
+                        <p>Configure the thank you message and complete your survey</p>
+                    </div>
+                    
+                    <div class="step-content">
+                        <div class="form-card">
+                            <h3><i class="fas fa-comment-dots"></i> Thank You Message</h3>
+                            <div class="form-group">
+                                <label for="thank-you-message">Thank You Title</label>
+                                <input type="text" id="thank-you-message" placeholder="Thank you for your response!" value="Thank you for your response!">
+                                <small>Main message shown after survey completion</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="thank-you-subtext">Thank You Subtext</label>
+                                <textarea id="thank-you-subtext" placeholder="Your feedback helps us improve our content and services." rows="3">Your feedback helps us improve our content and services.</textarea>
+                                <small>Additional message or call-to-action</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="thank-you-duration">Display Duration</label>
+                                <div class="duration-selector">
+                                    <input type="range" id="thank-you-duration" min="1000" max="10000" value="3000" step="500">
+                                    <span id="duration-display">3.0 seconds</span>
+                                </div>
+                                <small>How long to show the thank you message</small>
+                            </div>
+                        </div>
+
+                        <div class="completion-section">
+                            <div class="completion-card">
+                                <i class="fas fa-check-circle"></i>
+                                <h3>Survey Ready!</h3>
+                                <p>Your interactive feedback survey is complete and ready to use.</p>
+                                <div class="final-actions">
+                                    <button onclick="saveSurvey()" class="btn btn-success btn-lg">
+                                        <i class="fas fa-save"></i> Save Survey
+                                    </button>
+                                    <button onclick="previewSurvey()" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-eye"></i> Preview & Export
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="survey-summary">
+                                <h4>Survey Summary</h4>
+                                <div class="summary-grid">
+                                    <div class="summary-item">
+                                        <span class="summary-label">Title:</span>
+                                        <span class="summary-value" id="summary-title">Interactive Feedback Survey</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span class="summary-label">Questions:</span>
+                                        <span class="summary-value" id="summary-questions">3 questions</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span class="summary-label">Star Rating:</span>
+                                        <span class="summary-value" id="summary-stars">5 stars</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span class="summary-label">Video:</span>
+                                        <span class="summary-value" id="summary-video">Configured</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="wizard-navigation">
+                <button class="btn btn-secondary" id="prev-btn" onclick="previousStep()" disabled>
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <div class="step-info">
+                    Step <span id="current-step">1</span> of 5
+                    <br>
+                    <small><a href="#" onclick="goToStep(2)" style="color: #667eea;">Test Questions Step</a></small>
+                </div>
+                <button class="btn btn-primary" id="next-btn" onclick="nextStep()">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+</html>
