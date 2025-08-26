@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/editor", "destination": "/public/editor.html" },
+    { "source": "/preview/:id", "destination": "/public/preview.html" },
+    { "source": "/", "destination": "/public/index.html" }
+  ]
+}
